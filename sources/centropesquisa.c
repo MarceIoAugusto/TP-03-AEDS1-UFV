@@ -23,12 +23,9 @@ void LiberaListaCP(CentroPesquisa *Pokecenter){
 //      se ((poder a > poder b) ou (poder a == poder b E numero a > numero b)) entao faz a troca.
 //      Mas atrapalharia a contagem exata de movimentacoes e comparacoes. (Algoritmos de ordenação)
 
-void BubbleSort(CentroPesquisa *Pokecenter, int n){
+void BubbleSort(CentroPesquisa *Pokecenter, int n, int*movdef, int*compdef, int*movdes, int*compdes, clock_t *tempototal){
+    clock_t tempo = clock();
     int i,j; 
-    int compdes=0; //COMPARACAO CAUSADA PELO CRITERIO DE DESEMPATE
-    int movdes=0; //MOVIMENTACAO CAUSADA PELO CRITERIO DE DESEMPATE
-    int compdef=0; //CONTA APENAS A COMPARACAO PADRAO DO BOLHA
-    int movdef=0; //CONTA APENAS A MOVIMENTACAO PAREAO DO BOLHA
     TipoPokemon aux;
 
     for(i=0;i<n-1;i++){ //n-1 passadas no array
@@ -53,15 +50,12 @@ void BubbleSort(CentroPesquisa *Pokecenter, int n){
                 }
         }
     }
-    
+    *tempototal = clock() - tempo;
 }
 
-void SelectionSort(CentroPesquisa *Pokecenter, int n){
+void SelectionSort(CentroPesquisa *Pokecenter, int n, int*movdef, int*compdef, int*movdes, int*compdes, clock_t *tempototal){
+    clock_t tempo = clock();
     int i,j;
-    int compdes=0; //CONTA APENAS A COMPARACAO DE DESEMPATE
-    //MESMO COM DESEMPATE, A MOVIMENTACAO EH FEITA NO FINAL DA PASSADA
-    int compdef=0; //CONTA APENAS A COMPARACAO PADRAO DO SELECAO
-    int movdef=0; //CONTA APENAS A MOVIMENTACAO PADRAO DO SELECAO
     TipoPokemon aux;
     int MAX;
 
@@ -90,21 +84,15 @@ void SelectionSort(CentroPesquisa *Pokecenter, int n){
         *BuscaPokemon(&Pokecenter->Simples, n-1-i) = aux;
         movdef++;
     }
+    *tempototal = clock() - tempo;
 }
 
-void ShellSort(CentroPesquisa *Pokecenter, int n, clock_t* TempoTotal){
+void ShellSort(CentroPesquisa *Pokecenter, int n, int*movdef, int*compdef, int*movdes, int*compdes, clock_t *tempototal){
+    clock_t tempo = clock();
     int i,j;
     int h=1;
     TipoPokemon aux;
-    clock_t inicial;
-
-    int compdef=0; //Comparações que o Shellsort faria considerando somente o Poder.
-    int movdef=0; //Movimentações que o Shellsort faria considerando somente o Poder.
-
-    int compdes=0; //Comparações adicionais necessárias para aplicar o desempate pelo Número.
-    int movdes=0; //Movimentações adicionais provocadas pelo desempate.
-
-    inicial = clock();
+    
     while(h<n){
         h= h*3+1;  // h de Knuth
     }
@@ -145,43 +133,92 @@ void ShellSort(CentroPesquisa *Pokecenter, int n, clock_t* TempoTotal){
         }
     }
     while (h!=1);  
-    *TempoTotal = clock() - inicial; // tempo final - inicial = total
+    *tempototal = clock() - tempo; // tempo final - inicial = total
 }
 
 // funcoes do QuickSort
-void Particao(int esq, int dir, int *i, int *j, CentroPesquisa *Pokecenter){
+void Particao(int esq, int dir, int *i, int *j, CentroPesquisa *Pokecenter, int*movdef, int*compdef, int*movdes, int*compdes){
     TipoPokemon pivo, aux;
+    int poder_pivo, numero_pivo;
     *i=esq;
     *j=dir;
-    pivo = *BuscaPokemon(&Pokecenter->Sofisticado, (*i + *j) /2); // utilizando o item do meio como pivo
+
+    pivo = *BuscaPokemon(&Pokecenter->Sofisticado, ((*i + *j) /2)); // utilizando o item do meio como pivo
+    (*movdef)++;
+    poder_pivo = getPokePoder(&pivo); // armazena a chave poder do pivo (nao muda durante a exec de particao) (evita getters)
+    numero_pivo = getPokeNumero(&pivo); // armazena a chave numero do pivo (tambem nao muda)
+
+
     do{
+
         //percorre da esq pra dir em busca de uma chave maior que a chave do pivo
-        while(getPokePoder(BuscaPokemon(&Pokecenter->Sofisticado, i)) > getPokePoder(BuscaPokemon(&Pokecenter->Sofisticado, i))){
-            (*i)++;
+
+        while (*i <= dir) {
+            TipoPokemon *esquerda = BuscaPokemon(&Pokecenter->Sofisticado, *i);
+            int poder_esq   = getPokePoder(esquerda);
+            int num_esq = getPokeNumero(esquerda);
+
+            (*compdef)++;                       // comparação de poder (padrão)
+            if (poder_esq < poder_pivo) { (*i)++; continue; }
+            if (poder_esq > poder_pivo) break;          // A > pivo → para
+
+            // p == poder_pivo → desempate por número
+            (*compdes)++;
+            if (num_esq < numero_pivo) { (*i)++; continue; }
+            break;                              // A >= pivo → para
         }
-        //percorre da dir pra esq em busca de uma chave menor que a chave do pivo
-        while(getPokePoder(BuscaPokemon(&Pokecenter->Sofisticado, j)) < getPokePoder(BuscaPokemon(&Pokecenter->Sofisticado, j))){
-            (*j)--;
+
+        while (*j >= esq) {
+            TipoPokemon *direita = BuscaPokemon(&Pokecenter->Sofisticado, *j);
+            int poder_dir   = getPokePoder(direita);
+            int num_dir = getPokeNumero(direita);
+
+            (*compdef)++;                       // comparação de poder (padrão)
+            if (poder_dir > poder_pivo) { (*j)--; continue; }
+            if (poder_dir < poder_pivo) break;          // A < pivo → para
+
+            // p == poder_pivo → desempate por número
+            (*compdes)++;
+            if (num_dir > numero_pivo) { (*j)--; continue; }
+            break;                              // A <= pivo → para
         }
+
         if(*i <= *j){ //se eles nao se cruzaram, faz a troca
+            if(getPokePoder(BuscaPokemon(&Pokecenter->Simples, i)) == getPokePoder(BuscaPokemon(&Pokecenter->Simples, j))){
+                (*movdes)++;
+            }
+            else{
+                (*movdef)++;
+            }
+
+
+            // faz a troca
             aux = *BuscaPokemon(&Pokecenter->Sofisticado, i);
             *BuscaPokemon(&Pokecenter->Sofisticado, i) = *BuscaPokemon(&Pokecenter->Sofisticado, j);
             *BuscaPokemon(&Pokecenter->Sofisticado, j) = aux;
             (*i)++;
-            (*j)++;
+            (*j)--;
         }
     }
     while(*i <= *j);
 
 }
 
-void Ordena(int esq, int dir, CentroPesquisa *Pokecenter){
+void Ordena(int esq, int dir, CentroPesquisa *Pokecenter, int*movdef, int*compdef, int*movdes, int*compdes){
     int i,j;
-    Particao(esq, dir, &i, &j, Pokecenter);
-    if (esq < j) ordena(esq, j, Pokecenter);
-    if (i < dir) ordena(i, dir, Pokecenter);
+    if (esq >= dir) return; // evita chamar particao para subvetores de 1/0 elementos
+    Particao(esq, dir, &i, &j, Pokecenter, movdef, compdef, movdes, compdes);
+    if (esq < j) ordena(esq, j, Pokecenter, movdef, compdef, movdes, compdes);
+    if (i < dir) ordena(i, dir, Pokecenter, movdef, compdef, movdes, compdes);
 }
 
-void QuickSort(CentroPesquisa *Pokecenter, int n){
-    Ordena(0, n-1, Pokecenter);
+void QuickSort(CentroPesquisa *Pokecenter, int n, int*movdef, int*compdef, int*movdes, int*compdes, clock_t *tempototal){
+    clock_t tempo;
+    tempo = clock();
+    if (n>1){
+        Ordena(0, n - 1, Pokecenter, movdef, compdef, movdes, compdes);
+    }
+    *tempototal = clock() - tempo;
 }
+
+// fim funcoes do QuickSort 
