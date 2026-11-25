@@ -26,16 +26,6 @@ void ImprimeSelecionados(int *melhorequipe,TipoPokemon *lista, int tamanho){
         ImprimePokemon(&lista[melhorequipe[i]]);
     }
 }
-void ImprimeTreinadores(TipoTreinador *treinadores){
-    printf("\n=== Equipes dos Treinadores ===\n");
-        for(int i=0;i<NUM_TREINADORES;i++){
-            printf("Treinador %d: %s\n", i+1, getTreinadorNome(&treinadores[i]));
-            printf("Mochila do Treinador:\n");
-            ImprimeLista(getPokelista(&treinadores[i]));
-            printf("\n");
-    }
-}
-
 
 // Imprime saida faz a mesma impressão que as outras funcoes, mas no arquivo de saida.txt
 void ImprimeSaida(TipoPokemon *listapokemons, TipoTreinador *treinadores, int *melhorequipe, int poder_total, int energia_consumida,
@@ -86,6 +76,7 @@ void LimparTela() {
         system("clear"); // Comando para Linux e macOS
     #endif
 }
+
 void Menu(){
     LimparTela();
     printf("TP2 - AEDS I - PROBLEMA DE SELECAO DE POKEMON\n");

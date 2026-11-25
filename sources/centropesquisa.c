@@ -30,23 +30,21 @@ void BubbleSort(CentroPesquisa *Pokecenter, int n, int*movdef, int*compdef, int*
 
     for(i=0;i<n-1;i++){ //n-1 passadas no array
         for(j=1;j<n-i;j++){ //diminui a cada passada
-            compdef++;
-            if((getPokePoder(BuscaPokemon(&Pokecenter->Simples, j-1))) >= (getPokePoder(BuscaPokemon(&Pokecenter->Simples, j)))) //verifica se o poder anterior é maior ou igual ao proximo
-                compdes++;
-                if((getPokePoder(BuscaPokemon(&Pokecenter->Simples, j-1))) == (getPokePoder(BuscaPokemon(&Pokecenter->Simples, j)))){  //se as chaves são iguais, aplicamos o desempate no numero da pokedex
-                    compdes++;
+            (*compdef)++;
+            if((getPokePoder(BuscaPokemon(&Pokecenter->Simples, j-1))) > (getPokePoder(BuscaPokemon(&Pokecenter->Simples, j)))){ //verifica se o poder anterior é maior ou igual ao proximo
+                aux=*BuscaPokemon(&Pokecenter->Simples, j);
+                *BuscaPokemon(&Pokecenter->Simples, j) = *BuscaPokemon(&Pokecenter->Simples, j-1);
+                *BuscaPokemon(&Pokecenter->Simples, j-1)= aux;
+                (*movdef)+=3;
+            }
+            else if((getPokePoder(BuscaPokemon(&Pokecenter->Simples, j-1))) == (getPokePoder(BuscaPokemon(&Pokecenter->Simples, j)))){  //se as chaves são iguais, aplicamos o desempate no numero da pokedex
+                    (*compdes)++;
                     if((getPokeNumero(BuscaPokemon(&Pokecenter->Simples, j-1))) > (getPokeNumero(BuscaPokemon(&Pokecenter->Simples, j)))){
                         aux= *BuscaPokemon(&Pokecenter->Simples, j);
                         *BuscaPokemon(&Pokecenter->Simples, j) = *BuscaPokemon(&Pokecenter->Simples, j-1);
                         *BuscaPokemon(&Pokecenter->Simples, j-1)= aux;
-                        movdes+=3;
+                        (*movdes)+=3;
                     }
-                }
-                else{
-                    aux=*BuscaPokemon(&Pokecenter->Simples, j);
-                    *BuscaPokemon(&Pokecenter->Simples, j) = *BuscaPokemon(&Pokecenter->Simples, j-1);
-                    *BuscaPokemon(&Pokecenter->Simples, j-1)= aux;
-                    movdef+=3;
                 }
         }
     }
@@ -64,25 +62,22 @@ void SelectionSort(CentroPesquisa *Pokecenter, int n, int*movdef, int*compdef, i
     for(i=0;i<n-1;i++){
         MAX=0;
         for(j=1;j<n-i;j++){
-            compdef++;
-            if((getPokePoder(BuscaPokemon(&Pokecenter->Simples, j))) >= (getPokePoder(BuscaPokemon(&Pokecenter->Simples, MAX)))){
-                compdes++;
-                if((getPokePoder(BuscaPokemon(&Pokecenter->Simples, j))) == (getPokePoder(BuscaPokemon(&Pokecenter->Simples, MAX)))){
-                    compdes++;
-                    if((getPokeNumero(BuscaPokemon(&Pokecenter->Simples, j-1))) > (getPokeNumero(BuscaPokemon(&Pokecenter->Simples, MAX)))){
+            (*compdef)++;
+            if((getPokePoder(BuscaPokemon(&Pokecenter->Simples, j))) > (getPokePoder(BuscaPokemon(&Pokecenter->Simples, MAX)))){
+                MAX=j;
+            }
+            else if((getPokePoder(BuscaPokemon(&Pokecenter->Simples, j))) == (getPokePoder(BuscaPokemon(&Pokecenter->Simples, MAX)))){
+                    (*compdes)++;
+                    if((getPokeNumero(BuscaPokemon(&Pokecenter->Simples, j))) > (getPokeNumero(BuscaPokemon(&Pokecenter->Simples, MAX)))){
                         MAX=j;
                     }
                 }
-                else{
-                    MAX=j;
-                }
             }
-        }
 
         aux = *BuscaPokemon(&Pokecenter->Simples, MAX);
         *BuscaPokemon(&Pokecenter->Simples, MAX) = *BuscaPokemon(&Pokecenter->Simples, n-1-i);
         *BuscaPokemon(&Pokecenter->Simples, n-1-i) = aux;
-        movdef++;
+        (*movdef)+= 3;
     }
     *tempototal = clock() - tempo;
 }
@@ -93,22 +88,26 @@ void ShellSort(CentroPesquisa *Pokecenter, int n, int*movdef, int*compdef, int*m
     int h=1;
     TipoPokemon aux;
     
+    if (n <= 1) {
+        *tempototal = clock() - tempo;
+        return;
+    }
+
     while(h<n){
         h= h*3+1;  // h de Knuth
     }
     do{
         h=h/3;
         for (i=h;i<n;i++){
-            movdef++;// atribuicao do atual novo item ao aux
+            (*movdef)++;// atribuicao do atual novo item ao aux
             aux = *BuscaPokemon(&Pokecenter->Sofisticado, i);
             j=i;
-            while (getPokePoder(BuscaPokemon(&Pokecenter->Sofisticado, j-h)) >= getPokePoder(&aux)){
-                compdef++;//por conta do while acima (o padrao seria while a > b)
-                compdes++;//por conta do if abaixo
+            //inclui a contagem dentro do while
+            while (((*compdef)++),getPokePoder(BuscaPokemon(&Pokecenter->Sofisticado, j-h)) >= getPokePoder(&aux)){
                 if(getPokePoder(BuscaPokemon(&Pokecenter->Sofisticado, j-h)) == getPokePoder(&aux)){
-                    compdes++;//por conta do if abaixo
+                    (*compdes)++;//por conta do if abaixo
                     if((getPokeNumero(BuscaPokemon(&Pokecenter->Sofisticado, j-h))) > (getPokeNumero(&aux))){
-                        movdes++;
+                        (*movdes)++;
                         *BuscaPokemon(&Pokecenter->Sofisticado, j) = *BuscaPokemon(&Pokecenter->Sofisticado, j-h);
                         j-=h;
                         if (j<h){
@@ -120,16 +119,16 @@ void ShellSort(CentroPesquisa *Pokecenter, int n, int*movdef, int*compdef, int*m
                     }
                 }
                 else{
-                    movdef++;
-                    *BuscaPokemon(&Pokecenter->Simples, j) = *BuscaPokemon(&Pokecenter->Simples, j-h);
+
+                    *BuscaPokemon(&Pokecenter->Sofisticado, j) = *BuscaPokemon(&Pokecenter->Sofisticado, j-h);
                     j-=h;
                     if (j<h){
                         break;
                     }
                 }
             }
-        movdef++;//colocar o item em seu lugar
-        *BuscaPokemon(&Pokecenter->Simples, j) = aux;
+        (*movdef)++;//colocar o item em seu lugar
+        *BuscaPokemon(&Pokecenter->Sofisticado, j) = aux;
         }
     }
     while (h!=1);  
@@ -184,18 +183,18 @@ void Particao(int esq, int dir, int *i, int *j, CentroPesquisa *Pokecenter, int*
         }
 
         if(*i <= *j){ //se eles nao se cruzaram, faz a troca
-            if(getPokePoder(BuscaPokemon(&Pokecenter->Simples, i)) == getPokePoder(BuscaPokemon(&Pokecenter->Simples, j))){
-                (*movdes)++;
+            if(getPokePoder(BuscaPokemon(&Pokecenter->Sofisticado, *i)) == getPokePoder(BuscaPokemon(&Pokecenter->Sofisticado, *j))){
+                (*movdes) +=3;
             }
             else{
-                (*movdef)++;
+                (*movdef) +=3;
             }
 
 
             // faz a troca
             aux = *BuscaPokemon(&Pokecenter->Sofisticado, i);
-            *BuscaPokemon(&Pokecenter->Sofisticado, i) = *BuscaPokemon(&Pokecenter->Sofisticado, j);
-            *BuscaPokemon(&Pokecenter->Sofisticado, j) = aux;
+            *BuscaPokemon(&Pokecenter->Sofisticado, *i) = *BuscaPokemon(&Pokecenter->Sofisticado, *j);
+            *BuscaPokemon(&Pokecenter->Sofisticado, *j) = aux;
             (*i)++;
             (*j)--;
         }
@@ -208,8 +207,8 @@ void Ordena(int esq, int dir, CentroPesquisa *Pokecenter, int*movdef, int*compde
     int i,j;
     if (esq >= dir) return; // evita chamar particao para subvetores de 1/0 elementos
     Particao(esq, dir, &i, &j, Pokecenter, movdef, compdef, movdes, compdes);
-    if (esq < j) ordena(esq, j, Pokecenter, movdef, compdef, movdes, compdes);
-    if (i < dir) ordena(i, dir, Pokecenter, movdef, compdef, movdes, compdes);
+    if (esq < j) Ordena(esq, j, Pokecenter, movdef, compdef, movdes, compdes);
+    if (i < dir) Ordena(i, dir, Pokecenter, movdef, compdef, movdes, compdes);
 }
 
 void QuickSort(CentroPesquisa *Pokecenter, int n, int*movdef, int*compdef, int*movdes, int*compdes, clock_t *tempototal){
