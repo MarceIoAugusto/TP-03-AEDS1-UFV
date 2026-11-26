@@ -25,6 +25,9 @@ void QuickSort(CentroPesquisa *Pokecenter, int n, long int*movdef, long int*comp
 void Particao(int esq, int dir, int *i, int *j, CentroPesquisa *Pokecenter, long int*movdef, long int*compdef, long int*movdes, long int*compdes);
 void Ordena(int esq, int dir, CentroPesquisa *Pokecenter, long int*movdef, long int*compdef, long int*movdes, long int*compdes);
 
+//impressao
+void ImprimeCPSimples(CentroPesquisa *Pokecenter, int n);
+void ImprimeCPSofisticado(CentroPesquisa *Pokecenter, int n);
 
 
 #endif

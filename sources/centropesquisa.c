@@ -221,3 +221,13 @@ void QuickSort(CentroPesquisa *Pokecenter, int n, long int*movdef, long int*comp
 }
 
 // fim funcoes do QuickSort
+
+
+void ImprimeCPSimples(CentroPesquisa *Pokecenter, FILE *fptr){
+    ImprimeLista(&Pokecenter->Simples);
+    ImprimeListaFile(fptr, &Pokecenter->Simples);
+}
+void ImprimeCPSofisticado(CentroPesquisa *Pokecenter, FILE *fptr){
+    ImprimeLista(&Pokecenter->Simples);
+    ImprimeListaFile(fptr, &Pokecenter->Simples);
+}
